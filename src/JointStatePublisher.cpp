@@ -59,7 +59,7 @@ int JointStatePublisher::rosSetup()
                             boost::bind(&JointStatePublisher::jointStateCb, this, _1, i));
   }
 
-  joint_state_pub_ = nh_.advertise<sensor_msgs::JointState>("joint_states", 1);
+  joint_state_pub_ = pnh_.advertise<sensor_msgs::JointState>("joint_states", 1);
   
 }
 
