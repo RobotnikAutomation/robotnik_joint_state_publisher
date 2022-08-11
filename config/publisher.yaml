@@ -1,0 +1,1 @@
+joint_state_topics: "/a/joint_states /b/joint_states"
