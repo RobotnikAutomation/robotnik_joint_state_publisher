@@ -39,6 +39,7 @@ protected:
   sensor_msgs::JointState joint_state_;
   ros::Publisher joint_state_pub_;
   std::vector<std::string> joint_state_topics_;
+  std::vector<ros::Duration> joint_state_timeouts_;
   std::vector<ros::Subscriber> joint_state_subs_;
   std::vector<sensor_msgs::JointState> joint_state_msgs_;
 

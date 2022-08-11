@@ -13,20 +13,19 @@ JointStatePublisher::~JointStatePublisher()
 
 void JointStatePublisher::rosReadParams()
 {
-  //std::string joint_state_topics = "";
-  //readParam(pnh_, "source_lists", joint_state_topics, joint_state_topics);
-  //boost::split(joint_state_topics_, joint_state_topics, boost::is_any_of(" "));
-
-  XmlRpc::XmlRpcValue joint_state_topics;
-  bool has_joint_topics = readParam(pnh_, "source_list", joint_state_topics, joint_state_topics);
+  XmlRpc::XmlRpcValue joint_state_sources;
+  bool has_joint_topics = readParam(pnh_, "source_list", joint_state_sources, joint_state_sources);
   
   if (has_joint_topics == true)
   {
     try
     {
-      for(int i = 0; i < joint_state_topics.size(); i++)
+      for(int i = 0; i < joint_state_sources.size(); i++)
       {
-        joint_state_topics_.push_back(joint_state_topics[i]);
+        std::string topic_name = static_cast<std::string>(joint_state_sources[i]["topic"]);
+        double timeout = (double)joint_state_sources[i]["timeout"];
+        joint_state_topics_.push_back(topic_name);
+        joint_state_timeouts_.push_back(ros::Duration(timeout));
       }
     }
     catch(XmlRpc::XmlRpcException e)
@@ -96,15 +95,27 @@ void JointStatePublisher::emergencyState()
 
 void JointStatePublisher::jointStateCb(const sensor_msgs::JointStateConstPtr& input, int index)
 {
+
   joint_state_msgs_[index] = *input;
 }
 
 void JointStatePublisher::updateJointState()
 {
   joint_state_ = sensor_msgs::JointState();
+  joint_state_.header.stamp = ros::Time::now();
 
   for ( int i = 0; i < joint_state_msgs_.size(); i++ )
   {
+    ros::Duration elapsed_time = ros::Time::now() - joint_state_msgs_[i].header.stamp;
+    bool timed_out = (elapsed_time > joint_state_timeouts_[i]) & 
+                      (joint_state_timeouts_[i] != ros::Duration(0.0));
+                      
+    if (timed_out == true)
+    {
+      RCOMPONENT_WARN_STREAM_THROTTLE(1, "Joint state message timeout for topic " << joint_state_topics_[i]);
+      continue;
+    }
+
     for (int j = 0; j < joint_state_msgs_[i].name.size(); j++)
     {
       joint_state_.name.push_back(joint_state_msgs_[i].name[j]);

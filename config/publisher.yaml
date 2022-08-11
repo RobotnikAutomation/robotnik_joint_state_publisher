@@ -1,3 +1,5 @@
 source_list:
-  - /a/joint_states 
-  - /b/joint_states
+  - topic: /a/joint_states
+    timeout: 5.0 
+  - topic: /b/joint_states
+    timeout: 5.0
