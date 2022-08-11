@@ -7,6 +7,8 @@
 
 
 #include <rcomponent/rcomponent.h>
+#include <XmlRpcException.h>
+#include <boost/algorithm/string.hpp>
 
 
 class JointStatePublisher : public rcomponent::RComponent
@@ -40,7 +42,7 @@ protected:
   std::vector<ros::Subscriber> joint_state_subs_;
   std::vector<sensor_msgs::JointState> joint_state_msgs_;
 
-private:
+protected:
   /* RComponent stuff */
 
   //! Actions performed on init state

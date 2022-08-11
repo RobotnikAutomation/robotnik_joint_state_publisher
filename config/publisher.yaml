@@ -1,1 +1,3 @@
-joint_state_topics: "/a/joint_states /b/joint_states"
+source_list:
+  - /a/joint_states 
+  - /b/joint_states

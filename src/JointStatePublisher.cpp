@@ -1,5 +1,5 @@
 #include <robotnik_joint_state_publisher/JointStatePublisher.h>
-#include <boost/algorithm/string.hpp>
+
 JointStatePublisher::JointStatePublisher(ros::NodeHandle h) : RComponent(h), nh_(h), pnh_("~")
 {
   component_name.assign(pnh_.getNamespace());
@@ -13,9 +13,37 @@ JointStatePublisher::~JointStatePublisher()
 
 void JointStatePublisher::rosReadParams()
 {
-  std::string joint_state_topics = "";
-  readParam(pnh_, "joint_state_topics", joint_state_topics, joint_state_topics);
-  boost::split(joint_state_topics_, joint_state_topics, boost::is_any_of(" "));
+  //std::string joint_state_topics = "";
+  //readParam(pnh_, "source_lists", joint_state_topics, joint_state_topics);
+  //boost::split(joint_state_topics_, joint_state_topics, boost::is_any_of(" "));
+
+  XmlRpc::XmlRpcValue joint_state_topics;
+  bool has_joint_topics = readParam(pnh_, "source_list", joint_state_topics, joint_state_topics);
+  
+  if (has_joint_topics == true)
+  {
+    try
+    {
+      for(int i = 0; i < joint_state_topics.size(); i++)
+      {
+        joint_state_topics_.push_back(joint_state_topics[i]);
+      }
+    }
+    catch(XmlRpc::XmlRpcException e)
+    {
+      RCOMPONENT_ERROR_STREAM("Error in topics source list configuration format: " << e.getMessage());
+      exit(-1);
+    }
+
+  }
+  else
+  {
+    RCOMPONENT_ERROR("No joint state topics specified by 'source_list' parameter");
+    RComponent::switchToState(robotnik_msgs::State::SHUTDOWN_STATE);
+    // TODO: weeeeell, idk if this is the best way to do this
+    exit(-1);
+  }
+
 }
 
 int JointStatePublisher::rosSetup()
@@ -31,7 +59,7 @@ int JointStatePublisher::rosSetup()
                             boost::bind(&JointStatePublisher::jointStateCb, this, _1, i));
   }
 
-  joint_state_pub_ = pnh_.advertise<sensor_msgs::JointState>("joint_states", 1);
+  joint_state_pub_ = nh_.advertise<sensor_msgs::JointState>("joint_states", 1);
   
 }
 
