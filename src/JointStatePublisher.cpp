@@ -60,7 +60,7 @@ int JointStatePublisher::rosSetup()
 
   joint_state_pub_ = pnh_.advertise<sensor_msgs::JointState>("joint_states", 1);
 
-  return rcomponent::ReturnValue::OK;;
+  return rcomponent::ReturnValue::OK;
   
 }
 
