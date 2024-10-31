@@ -114,7 +114,7 @@ void JointStatePublisher::updateJointState()
                       
     if (timed_out == true)
     {
-      RCOMPONENT_WARN_STREAM_THROTTLE(1, "Joint state message timeout for topic " << joint_state_topics_[i]);
+      RCOMPONENT_WARN_STREAM_THROTTLE(30, "Joint state message timeout for topic " << joint_state_topics_[i]);
       continue;
     }
 
